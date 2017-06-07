@@ -15,8 +15,16 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
+from tutorial import views as tutorial_views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
+	url(r'^$',tutorial_views.login_redirect,name='login_redirect'),
     url(r'^admin/', admin.site.urls),
 	url(r'^account/', include('accounts.urls')),
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    

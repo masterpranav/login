@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'tutorial.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'tutorial.urls'
@@ -119,5 +120,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-
+MEDIA_URL = 'media/'
 LOGIN_REDIRECT_URL = '/account/'
+LOGIN_URL='/account/login/'
+
+LOGIN_EXEMPT_URLS = (
+    r'^account/logout/$'
+    r'^account/register/$'
+    )
+
+MEDIA_ROOT = os.path.join(BASE_DIR,"media")
+EMAIL_HOST= 'localhost'
+EMAIL_PORT = 1025

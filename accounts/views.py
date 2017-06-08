@@ -16,6 +16,8 @@ import textract, re, StringIO, curses.ascii, pytesseract, glob, os, codecs,sys, 
 from django.http import HttpResponse
 from accounts.models import Document, Clauses
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+
 
 
 # Create your views here.
@@ -31,8 +33,10 @@ def home(request):
 			text = pytesseract.image_to_string(Image.open(instance.doc.url))
 		elif instance.doc.url.endswith(".docx"):
 			text = textract.process(instance.doc.url)
+			print text
 		elif instance.doc.url.endswith(".doc"):
 			text = textract.process(instance.doc.url)
+			print text
 		else:
 			text=""
 		if text:
@@ -89,45 +93,45 @@ def change_password(request):
 
 def pdf_extractor(url):
 	text = textract.process(url)
-	try:
-		pdf = codecs.open(url, encoding="ISO8859-1", mode="rb").read()
-		startmark = "\xff\xd8"
-		startfix = 0
-		endmark = "\xff\xd9"
-		endfix = 2
-		i = 0
-		njpg = 0
-		while True:
-		    istream = pdf.find("stream", i)
-		    if istream < 0:
-		        break
-		    istart = pdf.find(startmark, istream, istream+20)
-		    if istart < 0:
-		        i = istream+20
-		        continue
-		    iend = pdf.find("endstream", istart)
-		    if iend < 0:
-		        raise Exception("Didn't find end of stream!")
-		    iend = pdf.find(endmark, iend-20)
-		    if iend < 0:
-		        raise Exception("Didn't find end of JPG!")
-		    istart += startfix
-		    iend += endfix
-		    print "JPG %d from %d to %d" % (njpg, istart, iend)
-		    jpg = pdf[istart:iend]
-		    f_name = re.findall(r"[\w']+", url)[-2]
-		    jpgfile = codecs.open("media/images/"+f_name+"jpg%d.jpg" % njpg, encoding="ISO8859-1", mode="w")
-		    jpgfile.write(jpg)
-		    jpgfile.close()
-		    njpg += 1
-		    i = iend
-		for file in sorted(os.listdir("media/images/")):
-		    print file
-		    if file.startswith(f_name):
-		        print "yes "+file
-		        text = text + pytesseract.image_to_string(Image.open("media/images/"+file))
-	except:
-		pass
+	# try:
+	pdf = codecs.open(url, encoding="ISO8859-1", mode="rb").read()
+	startmark = "\xff\xd8"
+	startfix = 0
+	endmark = "\xff\xd9"
+	endfix = 2
+	i = 0
+	njpg = 0
+	while True:
+	    istream = pdf.find("stream", i)
+	    if istream < 0:
+	        break
+	    istart = pdf.find(startmark, istream, istream+20)
+	    if istart < 0:
+	        i = istream+20
+	        continue
+	    iend = pdf.find("endstream", istart)
+	    if iend < 0:
+	        raise Exception("Didn't find end of stream!")
+	    iend = pdf.find(endmark, iend-20)
+	    if iend < 0:
+	        raise Exception("Didn't find end of JPG!")
+	    istart += startfix
+	    iend += endfix
+	    print "JPG %d from %d to %d" % (njpg, istart, iend)
+	    jpg = pdf[istart:iend]
+	    f_name = re.findall(r"[\w']+", url)[-2]
+	    jpgfile = codecs.open(settings.PDF2IMAGE_URL+f_name+"jpg%d.jpg" % njpg, encoding="ISO8859-1", mode="w")
+	    jpgfile.write(jpg)
+	    jpgfile.close()
+	    njpg += 1
+	    i = iend
+	for file in sorted(os.listdir(settings.PDF2IMAGE_URL)):
+	    print file
+	    if file.startswith(f_name):
+	        print "yes "+file
+	        text = text + pytesseract.image_to_string(Image.open(settings.PDF2IMAGE_URL+file))
+	# except:
+	# 	print "error found"
 	return text
 
 def extractor(request, text):

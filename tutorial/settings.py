@@ -123,7 +123,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'media/'
 LOGIN_REDIRECT_URL = '/account/'
 LOGIN_URL='/account/login/'
-
+PDF2IMAGE_URL='media/images/'
 LOGIN_EXEMPT_URLS = (
     r'^account/logout/$'
     r'^account/register/$'
